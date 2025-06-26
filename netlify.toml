@@ -1,5 +1,22 @@
+# 构建设置
 [build]
-        publish = "public/"
+command = "npm install" # 安装依赖 (如果您的项目需要)
+functions = "api" # 指向您的 Serverless Function 的目录，通常是 'api' 或 'netlify/functions'
+publish = "public" # 如果您的项目有前端静态文件，指定发布目录；对于纯 API 代理，这个可能不重要，但保留即可
 
+# 函数设置
 [functions]
-        node_bundler = "esbuild"
+node_bundler = "esbuild" # 指定 Node.js 函数的打包器
+directory = "api" # 再次明确函数的目录，确保Netlify知道在哪里找到您的函数
+
+# 重定向规则 (关键！)
+[[redirects]]
+from = "/v1/*" # 捕获所有以 /v1/ 开头的请求
+to = "/.netlify/functions/api/:splat" # 将这些请求重定向到您的名为 'api' 的函数
+status = 200 # 返回 200 OK 状态码，表示这是一个内部重写，而不是浏览器重定向
+force = true # 强制执行此规则
+
+[[redirects]]
+from = "/*" # 其他所有未匹配的请求 (用于处理根路径访问等)
+to = "/404.html" # 重定向到一个 404 页面，或者如您之前看到的，直接返回 404
+status = 404 # 返回 404 Not Found 状态码
